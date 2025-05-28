@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const TodoModel = mongoose.model("Todo", {
+const todoSchema = new mongoose.Schema({
   text: {
     type: String,
     required: true,
@@ -10,3 +10,6 @@ export const TodoModel = mongoose.model("Todo", {
     default: false,
   },
 });
+
+export const TodoModel =
+  mongoose.models.Todo || mongoose.model("Todo", todoSchema);

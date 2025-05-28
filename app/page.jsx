@@ -1,11 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
   const [editId, setEditId] = useState(null);
+
+  async function getTodo() {
+    const res = await fetch("/todos");
+    const data = await res.json();
+    setTodos(data.data);
+  }
+
+  useEffect(() => {
+    getTodo();
+  }, []);
 
   const handleAddOrUpdate = () => {
     if (input.trim() === "") return;
@@ -65,6 +75,7 @@ export default function Home() {
               key={index}
               className="flex justify-between items-center bg-indigo-100 p-2 rounded shadow"
             >
+              <input type="checkbox" checked={todo.completed} />
               <span>{todo.text}</span>
               <div className="space-x-2">
                 <button
