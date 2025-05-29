@@ -13,11 +13,12 @@ export default function Home() {
     setTodos(data.data);
   }
 
+  //? ------------------ Get All Todos ----------------------------
   useEffect(() => {
     getTodo();
   }, []);
 
-  const handleAddOrUpdate = () => {
+  const handleAddOrUpdate = async () => {
     if (input.trim() === "") return;
 
     if (editId !== null) {
@@ -28,7 +29,14 @@ export default function Home() {
       );
       setEditId(null);
     } else {
-      setTodos([...todos, { text: input }]);
+      const res = await fetch("/todos", {
+        method: "POST",
+        body: JSON.stringify({ text: input }),
+      });
+      const data = await res.json();
+      if (data.message === "success") {
+        getTodo();
+      }
     }
 
     setInput("");
@@ -39,9 +47,32 @@ export default function Home() {
     setEditId(index);
   };
 
-  const handleDelete = (index) => {
-    const newTodos = todos.filter((_, i) => i !== index);
-    setTodos(newTodos);
+  const handleDelete = async (_id) => {
+    const res = await fetch("/todos", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ _id }),
+    });
+    const data = await res.json();
+    if (data.message === "success") {
+      getTodo();
+    }
+  };
+
+  const toggleComplted = async (_id, completed) => {
+    const res = await fetch("/todos", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ _id, value: !completed }),
+    });
+    const data = await res.json();
+    if (data.message === "success") {
+      getTodo();
+    }
   };
 
   return (
@@ -75,7 +106,11 @@ export default function Home() {
               key={index}
               className="flex justify-between items-center bg-indigo-100 p-2 rounded shadow"
             >
-              <input type="checkbox" checked={todo.completed} />
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleComplted(todo._id, todo.completed)}
+              />
               <span>{todo.text}</span>
               <div className="space-x-2">
                 <button
@@ -85,7 +120,7 @@ export default function Home() {
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(index)}
+                  onClick={() => handleDelete(todo._id)}
                   className="text-sm bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                 >
                   Delete
