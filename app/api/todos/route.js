@@ -56,7 +56,7 @@ export async function DELETE(request, context) {
         message: "success",
       },
       {
-        status: 204,
+        status: 200,
       }
     );
   } catch (error) {

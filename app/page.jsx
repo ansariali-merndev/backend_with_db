@@ -1,15 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BarLoader } from "react-spinners";
 
 export default function Home() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
   const [editId, setEditId] = useState(null);
+  const [loader, setLoader] = useState(false);
 
   async function getTodo() {
-    const res = await fetch("/todos");
+    setLoader(true);
+    const res = await fetch("/api/todos");
     const data = await res.json();
+    setLoader(false);
     setTodos(data.data);
   }
 
@@ -29,7 +34,7 @@ export default function Home() {
       );
       setEditId(null);
     } else {
-      const res = await fetch("/todos", {
+      const res = await fetch("/api/todos", {
         method: "POST",
         body: JSON.stringify({ text: input }),
       });
@@ -48,7 +53,7 @@ export default function Home() {
   };
 
   const handleDelete = async (_id) => {
-    const res = await fetch("/todos", {
+    const res = await fetch("/api/todos", {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -56,13 +61,14 @@ export default function Home() {
       body: JSON.stringify({ _id }),
     });
     const data = await res.json();
+    console.log(data);
     if (data.message === "success") {
       getTodo();
     }
   };
 
   const toggleComplted = async (_id, completed) => {
-    const res = await fetch("/todos", {
+    const res = await fetch("/api/todos", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -77,10 +83,16 @@ export default function Home() {
 
   return (
     <>
-      <header className="h-[10vh] bg-indigo-600 flex justify-center items-center my-2">
+      <header className="h-[10vh] bg-indigo-600 flex justify-between items-center my-2 px-10">
         <h1 className="text-zinc-200 text-2xl font-semibold">
           Todo Application
         </h1>
+        <Link
+          href={"/login"}
+          className="bg-zinc-900 text-zinc-200 px-4 py-1 rounded-[2px] cursor-pointer"
+        >
+          Login
+        </Link>
       </header>
 
       <main className="min-h-[80vh] flex flex-col items-center gap-4 py-6">
@@ -99,7 +111,7 @@ export default function Home() {
             {editId !== null ? "Update" : "Add"}
           </button>
         </div>
-
+        {loader && <BarLoader color="blue" width={"100%"} />}
         <ul className="w-3/4 max-w-md space-y-2">
           {todos.map((todo, index) => (
             <li
