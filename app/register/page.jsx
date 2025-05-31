@@ -35,12 +35,14 @@ const Register = () => {
     });
 
     const data = await res.json();
-    console.log(data);
+    if (data.message === "success") {
+      Swal.fire("Success", "Registered successfully!", "success");
+    } else if (data.message === "failed") {
+      Swal.fire("Failed", data.extraMessage, "info");
+    } else if (data.message === "error") {
+      Swal.fire("Error", "Something went wrong", "error");
+    }
 
-    // console.log("Registering user:", formData);
-    Swal.fire("Success", "Registered successfully!", "success");
-
-    // Reset form
     setFormData({
       name: "",
       email: "",
