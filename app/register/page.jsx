@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import Swal from "sweetalert2";
 
@@ -23,8 +24,20 @@ const Register = () => {
       return;
     }
 
-    // You can replace this with your API call (axios/fetch)
-    console.log("Registering user:", formData);
+    const { name, email, password } = formData;
+
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    const data = await res.json();
+    console.log(data);
+
+    // console.log("Registering user:", formData);
     Swal.fire("Success", "Registered successfully!", "success");
 
     // Reset form
@@ -90,6 +103,12 @@ const Register = () => {
         >
           Register
         </button>
+        <p className="text-center">
+          Already have an Account{" "}
+          <Link className="text-indigo-500" href="/login">
+            login
+          </Link>
+        </p>
       </form>
     </div>
   );
