@@ -1,17 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Login with:", email, password);
-    setEmail("");
-    setPassword("");
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (data.message === "failed") {
+      Swal.fire("Failed", data.extraMessage, "error");
+      return;
+    }
+    if (data.message === "success") {
+      Swal.fire("Success", "Welcome Back", "success");
+      setEmail("");
+      setPassword("");
+      router.push("/");
+    }
   };
 
   return (

@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BarLoader } from "react-spinners";
+import Swal from "sweetalert2";
 
 export default function Home() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
   const [editId, setEditId] = useState(null);
   const [loader, setLoader] = useState(false);
+  const router = useRouter();
 
   async function getTodo() {
     setLoader(true);
@@ -23,6 +26,7 @@ export default function Home() {
     getTodo();
   }, []);
 
+  //!---------------------- POST ----------------------
   const handleAddOrUpdate = async () => {
     if (input.trim() === "") return;
 
@@ -36,11 +40,18 @@ export default function Home() {
     } else {
       const res = await fetch("/api/todos", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ text: input }),
       });
       const data = await res.json();
       if (data.message === "success") {
         getTodo();
+      } else if (data.message === "unAuthorized") {
+        Swal.fire("UnAuthorized", "Please login to access", "warning");
+        router.push("/login");
+        return;
       }
     }
 
@@ -100,6 +111,7 @@ export default function Home() {
           <input
             type="text"
             value={input}
+            name="input"
             onChange={(e) => setInput(e.target.value)}
             placeholder="Enter a task..."
             className="border border-gray-300 rounded px-3 py-1 w-64"
@@ -121,6 +133,7 @@ export default function Home() {
               <input
                 type="checkbox"
                 checked={todo.completed}
+                name="check"
                 onChange={() => toggleComplted(todo._id, todo.completed)}
               />
               <span>{todo.text}</span>

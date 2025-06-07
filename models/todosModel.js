@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const todoSchema = new mongoose.Schema({
   text: {
@@ -8,6 +8,10 @@ const todoSchema = new mongoose.Schema({
   completed: {
     type: Boolean,
     default: false,
+  },
+  userID: {
+    type: Schema.Types.ObjectId,
+    required: true,
   },
 });
 

@@ -1,20 +1,37 @@
 import { connectDB } from "@/lib/configdb";
+import { checkAuthorized, getAuthorizedUser } from "@/lib/customAuth";
 import { TodoModel } from "@/models/todosModel";
 
 await connectDB();
 
 export async function GET() {
   try {
-    const data = await TodoModel.find();
-    return Response.json(
-      {
-        message: "success",
-        data,
-      },
-      {
-        status: 200,
+    const checkUser = await checkAuthorized();
+    if (checkUser.message === "success") {
+      const id = checkUser.user._id;
+      let data = await TodoModel.find({ userID: id });
+      if (data.length === 0) {
+        data = [];
       }
-    );
+      return Response.json(
+        {
+          message: "success",
+          data,
+        },
+        {
+          status: 200,
+        }
+      );
+    } else {
+      return Response.json(
+        {
+          message: checkUser.message,
+        },
+        {
+          status: 401,
+        }
+      );
+    }
   } catch (error) {
     console.log(error);
     return Response.json({
@@ -25,15 +42,30 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { text } = await request.json();
-    const newTodo = new TodoModel({ text });
-    await newTodo.save();
-    return Response.json(
-      {
-        message: "success",
-      },
-      { status: 201 }
-    );
+    const checkUser = await checkAuthorized();
+
+    if (checkUser.message === "success") {
+      const { text } = await request.json();
+      const newTodo = new TodoModel({ text, userID: checkUser.user._id });
+      await newTodo.save();
+      return Response.json(
+        {
+          message: "success",
+        },
+        {
+          status: 201,
+        }
+      );
+    } else {
+      return Response.json(
+        {
+          message: checkUser.message,
+        },
+        {
+          status: 401,
+        }
+      );
+    }
   } catch (error) {
     console.log(error);
     return Response.json(
